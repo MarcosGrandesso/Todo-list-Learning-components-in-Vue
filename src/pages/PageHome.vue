@@ -1,39 +1,109 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <TarefaList msg="Welcome to Your Vue.js App" :tasks="listaDeTarefa" />
-    <p>{{ listaDeTarefa }}</p>
+    <nav class="orange darken-2">
+      <div class="nav-wrapper"></div>
+    </nav>
+    <div class="aling">
+      <TarefaList
+        msg="Welcome to Your Vue.js App"
+        :tasks="listaDeTarefa"
+        @deleta-task="recebiDeleta"
+        @edit-task="recebiEdit"
+      />
+      <FormsTask
+        v-show="modoEdicao"
+        :title="criacao.title"
+        :usuario="criacao.usuario"
+        :project="criacao.project"
+        :btn="btn"
+        @enviar-info="salvarInfo"
+        @enviar-info-2="ApiCriar"
+      >
+      </FormsTask>
+      <button class="btn circleb b" @click="recebiCriar">+</button>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
 import TarefaList from "../components/TarefaList.vue";
+import FormsTask from "../components/FormsTask.vue";
+import TasksApi from "../TasksApi";
 
 export default {
   components: {
     TarefaList,
+    FormsTask,
   },
   data: () => {
-    return { listaDeTarefa: ["a", "b", "c"] };
+    return {
+      listaDeTarefa: ["a", "b", "c"],
+      modoEdicao: false,
+      criacao: { title: "danielson", project: "teste", usuario: "nasdasd" },
+      idAtual: null,
+      btn: "",
+    };
   },
   created() {
-    console.log("terminei de carreagr a pag");
-    axios.get("http://localhost:3000/tasks/").then((response) => {
-      console.log(response.data);
-      this.listaDeTarefa = response.data;
-    });
+    this.get();
+  },
+  methods: {
+    delecao() {
+      TasksApi.delTask();
+    },
+    get() {
+      TasksApi.getTasks((data) => {
+        this.listaDeTarefa = data;
+      });
+    },
+    recebiDeleta(id) {
+      TasksApi.delTask(id, () => {
+        this.get();
+      });
+    },
+    recebiEdit(id) {
+      if (this.modoEdicao) {
+        this.modoEdicao = false;
+      } else {
+        this.modoEdicao = true;
+      }
+      this.btn = "editar";
+      this.idAtual = id;
+    },
+    recebiCriar() {
+      if (this.modoEdicao) {
+        this.modoEdicao = false;
+      } else {
+        this.modoEdicao = true;
+      }
+      this.btn = "Criar";
+    },
+
+    salvarInfo(info) {
+      this.criacao = info;
+      TasksApi.update(this.idAtual, this.criacao, () => {
+        this.get();
+      });
+    },
+    ApiCriar(info) {
+      this.criacao = info;
+      TasksApi.createTask(this.criacao, () => {
+        this.get();
+      });
+    },
   },
 };
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.b {
+  margin-left: 1rem;
+  margin-top: 1rem;
+  width: 3rem;
+}
+
+.aling {
+  display: flex;
+  flex-direction: column;
 }
 </style>
