@@ -39,7 +39,7 @@ export default {
     return {
       listaDeTarefa: ["a", "b", "c"],
       modoEdicao: false,
-      criacao: { title: "danielson", project: "teste", usuario: "nasdasd" },
+      criacao: { title: "", project: "", usuario: "" },
       idAtual: null,
       btn: "",
     };
